@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FileReader Test</title>
+</head>
+<body>
+
+<input type="file" id="fileInput" />
+
+<script>
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            console.log('File selected:', file.name);
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                console.log('FileReader onload event fired');
+                // Log the first 100 characters of the file content
+                console.log(e.target.result.substring(0, 100));
+            };
+
+            reader.onerror = function(error) {
+                console.error('Error reading file:', error);
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+</body>
+</html>

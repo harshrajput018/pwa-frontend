@@ -1,0 +1,285 @@
+/* ConversationList.css */
+.conversation-list {
+    width: 300px;
+    height: 90vh; /* Set height to 100vh for full screen */
+    
+    color: #333333;
+    background-color: white;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+     /* Fix the position to make it full screen */
+    top: 0;
+    left: 0;
+  }
+
+  @media only screen and (max-width: 800px) {
+    .conversation-list{
+      width: 100%;
+    }
+  }
+  
+  
+  .conversation {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .conversation:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .conversation.active {
+    background-color: #d0d0d0;
+  }
+  
+  .profile-pic img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+  }
+  
+  .conversation-info {
+    flex: 1;
+  }
+  
+  .name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333333;
+  }
+  
+  .last-message {
+    margin: 0;
+    font-size: 14px;
+    color: #777777;
+  }
+  
+  /* Scrollbar Styling */
+  .conversation-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .conversation-list::-webkit-scrollbar-thumb {
+    background-color: #d0d0d0;
+    border-radius: 4px;
+  }
+  
+  .conversation-list::-webkit-scrollbar-thumb:hover {
+    background-color: #c0c0c0;
+  }
+  
+  /* ConversationList.css */
+
+/* ... Existing styles ... */
+
+/* Style for the search bar */
+.search-people {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .search-people input {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    background-color: transparent;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .search-people button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .search-people button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Style for the search results */
+  .search-results {
+    margin-top: 20px;
+  }
+  
+  .search-result {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+  }
+  
+  .search-result:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .search-result .profile-pic img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+  }
+  
+  .search-result-info {
+    flex-grow: 1;
+  }
+  
+  .search-result-info h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .search-result-info p {
+    margin: 2px 0;
+    font-size: 14px;
+    color: #777;
+  }
+  
+  /* ... Existing styles ... */
+  /* ConversationList.css */
+
+/* ... Existing styles ... */
+
+/* Style for the logout button */
+#logout {
+    margin-top: 20px;
+    background-color: #dc3545;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  #logout:hover {
+    background-color: #c82333;
+  }
+  
+  /* ... Existing styles ... *//* Add your existing styles here */
+
+.menu-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .menu-toggle {
+    cursor: pointer;
+    margin-right: 10px; /* Add some spacing between toggle and menu button */
+  }
+  
+  .menu-icon {
+    font-size: 24px;
+    transition: transform 0.3s;
+  }
+  
+  .menu-icon.open {
+    transform: rotate(90deg);
+  }
+  
+  .menu {
+    position: absolute;
+    top: 100%;
+    
+    background-color: rgb(212, 216, 246);
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    display: none;
+    z-index: 2;
+    width: 120px; /* Adjust the width as needed */
+    border-radius: 4px; /* Rounded corners */
+    
+  }
+  
+  .menu.open {
+    display: block;
+  }
+  
+  .menu-item {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .menu-item:hover {
+    background-color: #f1f1f1;
+  }
+  
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .loader {
+    
+    border: 8px solid #f3f3f3; /* Light gray border */
+    border-top: 8px solid #3498db; /* Blue border (change color as needed) */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: rotate 2s linear infinite; /* Apply the rotate animation */
+    margin: 0 auto; /* Center the loader */
+    
+  }
+
+  @media screen and (max-width: 800px) {
+
+    .conversation{
+      width: 150px;
+      height: 150px;
+      border-radius: 75px;
+      flex-direction: column;
+      justify-content: space-between;
+      
+    }
+
+    #profile-pic{
+      width: 100px;
+      height: 100px;
+      border-radius: 50px;
+    }
+
+    .profile-pic img{
+      margin-right: 0;
+    }
+
+    .showAll{
+      display: flex;
+    }
+
+    .conversation-list{
+      height: 20vh;
+      padding: 1rem;
+    }
+    
+  }
+  
+  

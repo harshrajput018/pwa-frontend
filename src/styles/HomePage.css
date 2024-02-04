@@ -1,0 +1,119 @@
+/* HomePage.css */
+.home-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #63a69f, #1c2534);
+  font-family: 'Helvetica', sans-serif;
+  color: #fff;
+}
+
+.form-container {
+  width: 400px;
+  padding: 30px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 10px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.4);
+  animation: fadeInUp 0.5s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  color: #fff;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.tab-button.active {
+  border-bottom-color: #63a69f;
+  color: #63a69f;
+}
+
+.tab-button:not(.active):hover {
+  border-bottom-color: #fff;
+  color: #fff;
+}
+
+.login-form input,
+.sign-up-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  background-color: transparent;
+  font-size: 16px;
+  color: #fff;
+  transition: border-color 0.3s;
+}
+
+.login-form input:focus,
+.sign-up-form input:focus {
+  outline: none;
+  border-color: #63a69f;
+}
+
+.login-form button,
+.sign-up-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #63a69f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.login-form button:hover,
+.sign-up-form button:hover {
+  background-color: #1c2534;
+}
+
+.toggle-form {
+  text-align: center;
+  cursor: pointer;
+  color: #63a69f;
+  font-size: 14px;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.toggle-form:hover {
+  color: #a8bee3;
+}
+@keyframes slideIn {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

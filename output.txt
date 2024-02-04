@@ -1,0 +1,1046 @@
+Filename: ChatApp.js
+File Content:
+import React, { useEffect, useState } from 'react';
+import ConversationList from './ConversationList';
+import ChatWindow from './chatWindow';
+import FriendsComponent from './friends';
+import '../styles/ChatApp.css'; // Import your CSS file for styling
+const ChatApp = () => {
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const handleConversationSelect = (conversationId) => {
+    setSelectedConversation(conversationId);
+  };
+  return (
+    <div>
+      {localStorage.getItem('token') ? <div className="chat-app">
+          {/* Show the Login component if not logged in */}
+          <button id='responsive-btn' onClick={()=>{
+            let val = document.getElementById('list').style.display;
+            // console.logtypeof(val))
+            if(val==='none')
+            val='block'
+            else val='none';
+            document.getElementById('list').style.display=val;
+            // console.logdocument.getElementById('list').style.display)
+          }}>Select Chat</button>
+          <div id='list' className="conversation-list-container">
+            { 
+              <ConversationList
+                selectedConversation={selectedConversation}
+                onConversationSelect={handleConversationSelect}
+              />
+            }
+          </div>
+          {localStorage.getItem('chatWindow')=='true' && <div className="chat-window-container">
+            {isLoggedIn && selectedConversation ? (
+              <ChatWindow conversationId={selectedConversation} />
+            ) : (
+              <p className="no-conversation-message">
+                {isLoggedIn ? <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'70vh'}}>Select a conversation to start chatting.</div> : 'Please log in.'}
+              </p>
+            )}
+          </div> }
+          {localStorage.getItem('chatWindow')=='false' && <div style={{flex:2}} >
+            <FriendsComponent/>
+          </div>}
+        </div>: 'You need to login first'}
+    </div>
+  );
+};
+export default ChatApp;
+
+---------------------------
+Filename: ConversationList.js
+File Content:
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../styles/ConversationList.css';
+const ConversationList = ({ selectedConversation, onConversationSelect }) => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [allfriends, setallfriends] = useState(false);
+  const [all, setall] = useState([]);
+  const handleSearch = () => {
+    if (searchQuery == '') {
+      // console.log'ddd')
+      setSearchResults([])
+      return;
+    }
+    const results = all.filter(conversation => {
+      return conversation.username.toLowerCase().includes(searchQuery.toLowerCase())
+    }
+    );
+    // console.log'results',results);
+    setSearchResults(results);
+  };
+  // console.logsearchResults)
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery])
+  const handleSendRequest = (conversationId) => {
+    fetch('https://mern-api-9vf7.onrender.com/friends/request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token: localStorage.getItem('token'), to: conversationId })
+    })
+  };
+  // console.log'all',all)
+  // console.log'allfriends',allfriends)
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.setItem('logoutFlag', 'true');
+    navigate('/');
+  };
+  const handleFriends = () => {
+    localStorage.setItem('chatWindow', 'false');
+    localStorage.setItem('freinds', 'true');
+    window.location.reload();
+  }
+  const handleChat = () => {
+    localStorage.setItem('chatWindow', 'true');
+    localStorage.setItem('freinds', 'false');
+    window.location.reload();
+  }
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+  const getFriends = () => {
+    fetch('https://mern-api-9vf7.onrender.com/friends/getfriends', {
+      headers: {
+        token: localStorage.getItem('token'),
+      }
+    }).then((res) => res.json()).then(res => { setallfriends(res.users) })
+  }
+  // fetching all users for search
+  const getall = () => {
+    fetch('https://mern-api-9vf7.onrender.com/allusers/allusers').then(res => res.json()).then(res => {
+      setall(res.allusers)
+    })
+  }
+  useEffect(() => {
+    getFriends()
+    getall()
+  }, [])
+  return (
+    <div id='list' className="conversation-list">
+        <a href="/chatbot" style={{textDecoration:'none', color:'white',backgroundColor:'orange'}}>
+        <div style={{margin:'15px',fontWeight:'800', background:'royalblue', fontSize:'1rem',padding:'5px', color:'white', borderRadius:'5px',textAlign:'center' }} onMouseEnter={(e)=>{
+        e.target.style.cursor='pointer'
+      }}>CareBot</div></a>
+      {allfriends === false && <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', flexDirection:'column' }}>
+        <div className="loader"></div>
+      </div>}
+      {allfriends.length > 0 ?
+        <div>
+          {allfriends.map((conversation) => (
+            <div
+              key={conversation._id}
+              className={`conversation ${selectedConversation === conversation._id ? 'active' : ''}`}
+              onClick={() => {
+                localStorage.setItem('chatWindow', 'true');
+                localStorage.setItem('freinds', 'false');
+                localStorage.setItem('username', conversation.username)
+                if (window.innerWidth <= 800) {
+                  let val = document.getElementById('list').style.display;
+                  // console.logtypeof(val))
+                  if (val === 'none')
+                    val = 'block'
+                  else val = 'none';
+                  document.getElementById('list').style.display = val;
+                }
+                onConversationSelect(conversation._id);
+              }}
+            >
+              <div className="profile-pic">
+                <img src='https://www.imagediamond.com/blog/wp-content/uploads/2020/06/cartoon-boy-images-4.jpg' alt={`Profile of ${conversation.name}`} />
+              </div>
+              <div className="conversation-info">
+                <h4 className="name">{conversation.username}</h4>
+              </div>
+            </div>
+          ))
+          }
+        </div> : <div style={{ fontFamily: 'sans-serif', fontSize: '2rem', padding: '1rem', paddingTop: '5rem' }}>
+          YOU DON'T HAVE ANY FRIENDS YET. <button onClick={() => {
+            navigate('/friends')
+          }} style={{ background: 'black', color: 'white', width: 'fit', border: 'none', padding: '1rem', fontSize: '1.25rem' }}>FIND PEOPLE</button>
+        </div>
+      }
+    </div>
+  );
+};
+export default ConversationList;
+
+---------------------------
+Filename: chatWindow.js
+File Content:
+import React, { useState, useEffect, useRef } from 'react';
+import io from 'socket.io-client'
+import '../styles/ChatWindow.css'; // Update with the correct path for CSS // Update the path accordingly
+const ChatWindow = ({ conversationId }) => {
+  // console.loglocalStorage.getItem('username'))  
+  const [newMessage, setNewMessage] = useState('');
+  const [messages, setConversation] = useState([]);
+  const messageListRef = useRef(null);
+    setTimeout(() => {
+      const messageList = messageListRef.current;
+      if (messageList) {
+        messageList.scrollTop = messageList.scrollHeight;
+      }
+    }, 2000);
+useEffect(() => {
+    fetch('https://mern-api-9vf7.onrender.com/getchats',{
+        headers:{
+            from: localStorage.getItem('token'),
+            to: conversationId
+        }
+    }).then(res=>res.json()).then(res=>{
+        setConversation(res.msgs);
+    });
+  }, [conversationId]); 
+    // Establish socket connection
+    useEffect(() => {
+        // console.log'ndfhhd')
+        const socket = io('https://mern-api-9vf7.onrender.com/',{
+            transports: ['websocket', 'polling', 'flashsocket'],
+            auth: {
+              token: localStorage.getItem('token'),
+              // Replace with the actual token
+            }}) 
+       socket.on('send',(res)=>{
+        // console.logres)
+        setConversation(res.msgs);
+       })
+       return () => {
+            if (socket.readyState === 1) { // <-- This is important
+                socket.disconnect();
+            }
+        }
+      }, [])
+//   Empty dependency array to run this effect only once
+  const handleSendMessage = () => {
+    if (newMessage.trim() === '') return;
+    const socket = io('https://mern-api-9vf7.onrender.com/',{
+            transports: ['websocket', 'polling', 'flashsocket'],
+            auth: {
+              token: localStorage.getItem('token'),
+              to: conversationId // Replace with the actual token
+            }})
+    socket.emit('send',{fromtoken: localStorage.getItem('token'), to: conversationId, content:newMessage, time: new Date().toLocaleTimeString()
+})
+socket.on('send',(res)=>{
+    // console.logres)
+    setConversation(res.msgs);
+   })
+    // Event listener for receiving messages
+    // const newMessageObj = {
+    //   id: conversation.messages.length + 1,
+    //   sender: 'You',
+    //   text: newMessage,
+    //   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    // };
+    // const updatedConversation = {
+    //   ...conversation,
+    //   messages: [...conversation.messages, newMessageObj],
+    // };
+    // setConversation(updatedConversation);
+    setNewMessage('');
+    // Scroll to the bottom of the message list after a short delay to ensure rendering
+    setTimeout(() => {
+      const messageList = messageListRef.current;
+      if (messageList) {
+        messageList.scrollTop = messageList.scrollHeight;
+      }
+    }, 100); // Adjust the delay as needed
+  };
+//   if (!conversation) {
+//     return <div className="chat-window">Loading...</div>;
+//   }
+  return (
+    <div className="chat-window">
+      <div className="chat-header">
+        { <h2 className="chat-title">{localStorage.getItem('username')}</h2> }
+      </div>
+      <div className="message-list" ref={messageListRef}>
+        { messages && messages.map(message => (
+          <div key={message._id} className={`message ${message.to === conversationId ? 'sent' : 'received'}`}>
+            <div className="message-content">
+              <p className="message-text">{message.content}</p>
+              <p className="message-timestamp">{message.timestamp}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="message-input-container">
+        <div className="message-input">
+          <input
+            type="text"
+            placeholder="Type your message..."
+            value={newMessage}
+            onChange={event => setNewMessage(event.target.value)}
+          />
+          <button className="send-button" onClick={handleSendMessage}>
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default ChatWindow;
+
+---------------------------
+Filename: chatbot.js
+File Content:
+import { useState, useEffect } from 'react';
+import OpenAI from 'openai';
+import ChatbotWindow from './chatbotwindow';
+const Chatbot = () => {
+    const [messages,setMessages]= useState([{"role":"user","content":"you are a mental health expert and you will ask me about how was my day and assist me on this just make it short and precise i want you to answer in 50-100 words . start off by asking how was your day ok ? just keep up the conversation dont let it end unless i tell you . after i press this just write - How are you feeling today ? "}]);
+    const [flag,setFlag]= useState(false);
+    useEffect(()=>{
+        async function gg(){
+            const openai = new OpenAI({
+                apiKey: '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',
+                dangerouslyAllowBrowser: true // Replace this with your actual API key
+            });
+            // Check if the create method exists before calling it
+                const response = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: messages,
+                    max_tokens:50
+                });
+                setMessages(prev=>{
+                    prev.push(response.choices[0].message);
+                    return prev;
+                })
+                console.log('first',messages)
+        }
+        if(messages.length<=2)
+        gg();
+    },[])
+        const fetchData = async (e) => {
+            localStorage.setItem('loader','true')
+            setMessages(prev=>{
+                let temp = [...prev];
+                temp.push({"role":"user","content":document.getElementById('question').value})
+                return temp;
+            })
+            setFlag(true)
+        };
+        useEffect(()=>{
+            document.getElementById('question').value=''
+            if(messages.length>2)
+            {
+            setTimeout(async() => {
+                try {
+                    // Check if the OpenAI library is properly imported and instantiated
+                    if (typeof OpenAI !== 'undefined' && OpenAI !== null) {
+                        const openai = new OpenAI({
+                            apiKey: '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',
+                            dangerouslyAllowBrowser: true // Replace this with your actual API key
+                        });
+                        // Check if the create method exists before calling it
+                            console.log(messages)
+                            const response = await openai.chat.completions.create({
+                                model: "gpt-3.5-turbo",
+                                messages: messages,
+                                max_tokens:50
+                            });
+                            localStorage.setItem('loader','false')
+                            if(flag)
+                            {
+                                setFlag(false);
+                                setMessages(prev=>{
+                                    let temp = [...prev];
+                                    temp.push(response.choices[0].message);
+                                    return temp;
+                                })
+                            }
+                    } else {
+                        console.error('OpenAI library not properly imported or instantiated');
+                    }
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            },500);
+        }
+        console.log(messages)
+        },[messages])
+    return (
+        <div style={{width:'70%', margin:'0 auto', background:'white', boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px'}}>
+            <div style={{background:'royalblue', height:'10vh'}}></div>
+            <ChatbotWindow dummyArray={messages.slice(2)}/>
+            <div style={{width:'100%', display:'flex', gap:'5px'}}>
+            <input style={{width:'100%',flex:'5',height:'10vh', borderRadius:'5px', border:'solid grey 2px'}} id='question' type="text" />
+            <button onClick={()=>{fetchData()}} style={{flex:'1', borderRadius:'5px', background:'#3751d4', fontWeight:'700', color:'white', border:'none'}} onMouseEnter={(e)=>e.target.style.cursor='pointer'} >SEND</button>
+            </div>
+        </div>
+    );
+};
+export default Chatbot;
+
+---------------------------
+Filename: chatbotwindow.js
+File Content:
+import { useEffect } from "react";
+export default function ChatbotWindow(props){
+    const dummyArray = [
+        { role: 'assistant', content: 'How was your day?' },
+        { role: 'user', content: 'It didn\'t go well.' },
+        { role: 'assistant', content: 'What did you do today?' },
+        { role: 'user', content: 'I had some meetings.' },
+        { role: 'assistant', content: 'Did anything interesting happen?' },
+        { role: 'user', content: 'Not really, just the usual stuff.' },
+        { role: 'assistant', content: 'Is there anything I can help you with?' },
+        { role: 'assistant', content: 'Okay, feel free to ask if you need anything.' },
+        { role: 'user', content: 'Sure, thanks!' }
+      ];
+      useEffect(()=>{
+        var scrollable=document.getElementById('inner-scroll');
+    scrollable.scrollTo(0, scrollable.scrollHeight-scrollable.clientHeight);
+      },[props.dummyArray.length])
+    return (
+        <div>
+            <div id="inner-scroll" style={{overflow:'scroll',height:'70vh',}}>
+            <div style={{   padding:'1rem 1rem',display:'flex', flexDirection:'column',justifyContent:'flex-end'}}>
+            <div style={{ width:'100%', display:'flex', justifyContent:'flex-start'}}>
+                    <div  style={{
+                padding:'1rem', background:'#114513', width:'40%', borderRadius:'5px', fontSize:'0.75rem',color:'white'}}>
+                    Hey {localStorage.getItem('user')}! I'm here to make sure your day gets even better. How did your day treat you?
+                </div>
+                </div>
+            {props.dummyArray.map((elem,index)=>{
+                return (
+                <div style={{ width:'100%', display:'flex', justifyContent:elem.role==='user'?'flex-end':'flex-start'}}>
+                    {elem.role!=='user' && localStorage.getItem('loader')==='true' && index===props.dummyArray.length-1 ? <div className="loader"></div>:
+                <div  style={{
+                    padding:'1rem', background:elem.role==='user'?'#4663ac':'#114513', width:'40%', borderRadius:'5px', fontSize:'0.75rem', color:'white'}}>
+                        {elem.content}
+                    </div>}
+                </div>)
+            })}
+            </div>
+            </div>
+        </div>
+    )
+}
+---------------------------
+Filename: friends.js
+File Content:
+import React, { useState, useEffect } from 'react';
+import '../styles/FriendsComponent.css';
+const FriendsComponent = () => {
+  const [activeTab, setActiveTab] = useState('allFriends');
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+  const [allFriendsData,setAllFriendsData] = useState(
+  [
+  ])
+  const getFriends = ()=>{
+    fetch('https://mern-api-9vf7.onrender.com/friends/getfriends',{
+        headers:{
+            token: localStorage.getItem('token'),
+        }
+    }).then((res)=>res.json()).then(res=>setAllFriendsData(res.users))}
+  const [friendRequestsData,setFriendRequestsData] = useState([
+    // Add more friend requests here
+  ])
+  const getrequest = ()=>{
+    fetch('https://mern-api-9vf7.onrender.com/friends/getrequest',{
+        headers:{
+            token: localStorage.getItem('token'),
+        }
+    }).then((res)=>res.json()).then(res=>{setFriendRequestsData(res.users)})
+  }
+  useEffect(()=>{
+    getFriends();
+    getrequest();
+  },[])
+  function handleAccept(id){
+    fetch('https://mern-api-9vf7.onrender.com/friends/accept',{
+    headers:{
+        token: localStorage.getItem('token'),
+        id: id
+    }
+    }).then(res=>res.json()).then(res=>{
+        if(res.status=='successful')
+        {
+            getrequest();
+        }
+    })
+  }
+  function handleReject(id){
+    fetch('https://mern-api-9vf7.onrender.com/friends/reject',{
+    headers:{
+        token: localStorage.getItem('token'),
+        id: id
+    }
+    }).then(res=>res.json()).then(res=>{
+        if(res.status === 'successful')
+        {
+            getrequest();
+        }
+    })
+  }
+  return (
+    <div className="friends-component">
+      <div className="tabs">
+        <button style={{color:"black"}}
+          className={`tab-button ${activeTab === 'allFriends' ? 'active' : ''}`}
+          onClick={() => {handleTabChange('allFriends' );getFriends()}}
+        >
+          All Friends
+        </button>
+        <button style={{color:'black'}}
+          className={`tab-button ${activeTab === 'requests' ? 'active' : ''}`}
+          onClick={() => {handleTabChange('requests'); getrequest()}}
+        >
+          Requests
+        </button>
+      </div>
+      <div className="content">
+        {activeTab === 'allFriends' && (
+          <div className="friends-list">
+            {allFriendsData.map((friend) => (
+              <div key={friend._id} className="friend-item">
+                <img src='https://www.imagediamond.com/blog/wp-content/uploads/2020/06/cartoon-boy-images-4.jpg' alt={friend.name} />
+                <p>{friend.username}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {activeTab === 'requests' && (
+          <div className="requests-list">
+            {friendRequestsData.map((request) => (
+              <div key={request._id} className="request-item">
+                <img src='https://www.imagediamond.com/blog/wp-content/uploads/2020/06/cartoon-boy-images-4.jpg' alt={request.username} />
+                <p>{request.username}</p>
+                <button className="accept-button" onClick={()=>{
+                    handleAccept(request._id)
+                }}>Accept</button>
+                <button className="reject-button" onClick={()=>{handleReject(request._id)}}>Reject</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+export default FriendsComponent;
+
+---------------------------
+Filename: login.js
+File Content:
+// HomePage.js
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import '../styles/HomePage.css'; // Import your CSS file for styling
+const Login = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [count,setCount]= useState(0);
+    useEffect(()=>{
+        if(localStorage.getItem('token'))
+        {
+            navigate('/chat')
+        }
+    },[])
+    const [activeForm, setActiveForm] = useState('login');
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+    });
+    useEffect(() => {
+        if (localStorage.getItem('logoutFlag') === 'true')
+            setTimeout(() => {
+                localStorage.removeItem('logoutFlag');
+                document.getElementById('msg').style.display='none' // Trigger re-render to remove the message
+            }, 2000);
+        if(localStorage.getItem('signup') === 'true')
+        {
+            setTimeout(() => {
+                localStorage.removeItem('signup');
+                document.getElementById('msg1').style.display='none' // Trigger re-render to remove the message
+            }, 2000);
+        }
+    }, [activeForm])
+    const toggleForm = () => {
+        setActiveForm(activeForm === 'login' ? 'signup' : 'login');
+    };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (activeForm === 'signup')
+            fetch('https://mern-api-9vf7.onrender.com/allusers/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: formData.username, email: formData.email, password: formData.password })
+            }).then(res=>res.json()).then(res=>{
+                if(res.user)
+                {
+                    setActiveForm('login')
+                    setFormData({
+                        username: '',
+                        email: '',
+                        password: '',
+                    })
+                    localStorage.setItem('signup','true');
+                }
+                })
+        else {
+            localStorage.setItem('user',formData.username)
+            fetch('https://mern-api-9vf7.onrender.com/allusers/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: formData.username, password: formData.password })
+            }).then(res => res.json()).then(res => {
+                if (res.token) {
+                    localStorage.setItem('token', res.token);
+                    navigate('/chat')
+                }
+            });
+            localStorage.setItem('signup','false');
+        }
+        // Handle login or signup logic here
+        // console.log'Form submitted:', formData);
+    };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+    return (
+        <div className="home-page">
+            {(localStorage.getItem('logoutFlag') == 'true') && <div  id='msg' style={{
+                background: '#63a69f',
+                color: '#fff',
+                padding: '10px',
+                textAlign: 'center',
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                right: '0',
+                zIndex: '999',
+                animation: 'slideIn 0.5s ease-in-out',
+                fontFamily: 'Arial, sans-serif',
+            }}>
+                Successfully Logged Out
+            </div>}
+      {(localStorage.getItem('signup') == 'true') && <div  id='msg1' style={{
+                background: '#63a69f',
+                color: '#fff',
+                padding: '10px',
+                textAlign: 'center',
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                right: '0',
+                zIndex: '999',
+                animation: 'slideIn 0.5s ease-in-out',
+                fontFamily: 'Arial, sans-serif',
+            }}>
+                Successfully Signed Up
+            </div>}
+            <div className="form-container">
+                <div className="form-tabs">
+                    <button
+                        className={`tab-button ${activeForm === 'login' ? 'active' : ''}`}
+                        onClick={() => setActiveForm('login')}
+                    >
+                        Log In
+                    </button>
+                    <button
+                        className={`tab-button ${activeForm === 'signup' ? 'active' : ''}`}
+                        onClick={() => setActiveForm('signup')}
+                    >
+                        Sign Up
+                    </button>
+                </div>
+                <form className="login-form" onSubmit={handleSubmit}>
+                    {activeForm === 'signup' && (
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                        />
+                    )}
+                    <input
+                        type="text"
+                        name="username"
+                        placeholder="Username"
+                        value={formData.username}
+                        onChange={handleChange}
+                    />
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Password"
+                        value={formData.password}
+                        onChange={handleChange}
+                    />
+                    <button type="submit">{activeForm === 'login' ? 'Log In' : 'Sign Up'}</button>
+                </form>
+                <p className="toggle-form" onClick={toggleForm}>
+                    {activeForm === 'login'
+                        ? 'Don\'t have an account? Sign up'
+                        : 'Already have an account? Log in'}
+                </p>
+            </div>
+        </div>
+    );
+};
+export default Login;
+---------------------------
+Filename: nav.js
+File Content:
+import { NavLink, useNavigate} from "react-router-dom"
+import "../styles/nav.css"
+export default function Nav() {
+    const navigate = useNavigate();
+    console.log('nav')
+    return (
+        <div>
+            {
+                localStorage.getItem('token') ? <nav style={{display:'flex', justifyContent:'space-between', width:'100%', padding:'0.5rem 2rem' }} class="navbar navbar-expand-lg navbar-light bg-light">
+                <div style={{display:'flex',justifyContent:'space-between',width:'100%', }}> <a style={{fontFamily:'cursive', fontSize:'2rem', fontWeight:'600', color:'teal'}}class="navbar-brand" href="#">Connect Well</a>
+                <div>
+                <button class="navbar-toggler " type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+                </div>
+               </div>
+                <div style={{width:'70%'}}>
+                <div   class="collapse navbar-collapse" id="navbarSupportedContent">
+                  <ul style={{
+                    display:'flex',
+                    gap:'1rem',
+                  }} class="navbar-nav ml-auto">
+                    <li class="nav-item " >
+                      <a class="nav-link" href="/">Chat <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="/friends">Friends</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" onClick={()=>{localStorage.removeItem('token');
+                      localStorage.setItem('logoutFlag',true)} }
+                      href='/'>Logout</a>
+                    </li>
+                  </ul>
+                </div>
+                </div>
+              </nav>: <div></div>
+}
+        </div>
+    )
+}
+---------------------------
+Filename: newfriends.js
+File Content:
+import { useEffect, useState } from 'react';
+import '../styles/newfriends.css'
+import { FaSearch } from 'react-icons/fa';
+export default function NewFriends() {
+    console.log('new')
+    const changeColor = (id) => {
+        if (id == 'one') {
+            document.getElementById('one').style.background = '#1c5d9d'
+            document.getElementById('two').style.background = '#001f3f'
+            document.getElementById('three').style.background = '#001f3f'
+        }
+        else if (id == 'two') {
+            document.getElementById('two').style.background = '#1c5d9d'
+            document.getElementById('one').style.background = '#001f3f'
+            document.getElementById('three').style.background = '#001f3f'
+        }
+        else if (id == 'three') {
+            document.getElementById('three').style.background = '#1c5d9d'
+            document.getElementById('two').style.background = '#001f3f'
+            document.getElementById('one').style.background = '#001f3f'
+        }
+    }
+    const [allfriends, setAllFriendsData] = useState(false);
+    const [friendRequestsData, setFriendRequestsData] = useState(false)
+    const [friendSentData, setFriendSentData] = useState(false)
+    const [allUsers, setAllUsers] = useState([])
+    const [arr, setArr] = useState([]);
+    const [input, setInput] = useState('');
+    useEffect(() => {
+        if (input === '')
+            setArr([])
+        else {
+            const arr = allUsers.filter((elem) => {
+                let query = input.toLowerCase();
+                let username = elem.username.toLowerCase()
+                if (username.includes(query))
+                    return elem
+            })
+            setArr(arr)
+        }
+    }, [input])
+    const handleSendRequest = (conversationId) => {
+        fetch('https://mern-api-9vf7.onrender.com/friends/request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: localStorage.getItem('token'), to: conversationId })
+        })
+    };
+    function handleRejectFriend(id) {
+        fetch('https://mern-api-9vf7.onrender.com/friends/reject', {
+            headers: {
+                token: localStorage.getItem('token'),
+                id: id,
+                friend: true
+            }
+        }).then(res => res.json())
+        let arr = allfriends.filter(elem=>elem._id!=id)
+        setAllFriendsData(arr);
+    }
+    function handleRejectSent(id) {
+        fetch('https://mern-api-9vf7.onrender.com/friends/reject', {
+            headers: {
+                token: localStorage.getItem('token'),
+                id: id
+            }
+        }).then(res => res.json()).then(()=>{
+            getfriends() 
+            getrequest()
+            sentrequest()
+        })
+    }
+    function handleAccept(id){
+        fetch('https://mern-api-9vf7.onrender.com/friends/accept',{
+        headers:{
+            token: localStorage.getItem('token'),
+            id: id
+        }
+        }).then(res=>res.json()).then(res=>{
+            if(res.status === 'successful')
+            {
+                getfriends();
+                getrequest();
+                sentrequest()
+            }
+        })
+      }
+      function handleReject(id){
+        setFriendRequestsData(false)
+        fetch('https://mern-api-9vf7.onrender.com/friends/reject',{
+        headers:{
+            token: localStorage.getItem('token'),
+            id: id
+        }
+        }).then(res=>res.json()).then(res=>{
+            if(res.status === 'successful')
+            {
+                getfriends();
+                getrequest();
+                sentrequest()
+            }
+        })
+      }
+    const getfriends = ()=>{
+        setAllFriendsData(false)
+        fetch('https://mern-api-9vf7.onrender.com/friends/getfriends', {
+            headers: {
+                token: localStorage.getItem('token'), 
+            }
+        }).then((res) => res.json()).then(res => {setAllFriendsData(res.users)})
+    }
+    const getrequest = ()=>{
+        setFriendRequestsData(false)
+        fetch('https://mern-api-9vf7.onrender.com/friends/getrequest', {
+            headers: {
+                token: localStorage.getItem('token'),
+            }
+        }).then((res) => res.json()).then(res => { console.log(res); setFriendRequestsData(res.users) })
+    }
+    const sentrequest = ()=>{
+        setFriendSentData(false)
+        fetch('https://mern-api-9vf7.onrender.com/friends/sentrequest', {
+            headers: {
+                token: localStorage.getItem('token'),
+            }
+        }).then((res) => res.json()).then(res => { console.log(res); setFriendSentData(res.users) })
+    }
+    useEffect(() => {
+        fetch('https://mern-api-9vf7.onrender.com/friends/getfriends', {
+            headers: {
+                token: localStorage.getItem('token'), 
+            }
+        }).then((res) => res.json()).then(res => setAllFriendsData(res.users))
+        fetch('https://mern-api-9vf7.onrender.com/friends/getrequest', {
+            headers: {
+                token: localStorage.getItem('token'),
+            }
+        }).then((res) => res.json()).then(res => { console.log(res); setFriendRequestsData(res.users) })
+        fetch('https://mern-api-9vf7.onrender.com/friends/sentrequest', {
+            headers: {
+                token: localStorage.getItem('token'),
+            }
+        }).then((res) => res.json()).then(res => { console.log(res); setFriendSentData(res.users) })
+        fetch('https://mern-api-9vf7.onrender.com/allusers/allusers', {
+            headers: {
+                token: localStorage.getItem('token')
+            }
+        }).then(res => res.json()).then((res) => {
+            console.log(res)
+            setAllUsers(res.allusers);
+        })
+    }, [])
+    return (
+        <div id='container_newFriends'>
+            <div style={{ width: '50%', padding: '0', margin: '0', position: 'relative' }}>
+                <div id='search-container' >
+                    <div style={{ marginTop: "0.15rem", color: 'white', fontSize: '1rem' }}>
+                        <FaSearch />
+                    </div>
+                    <input id='input' onChange={() => { setInput(document.getElementById('input').value) }}
+                        onFocus={
+                            () => document.getElementById('input').placeholder = ""
+                        }
+                        onMouseLeave={() => {
+                            document.getElementById('input').placeholder = "Search People...."
+                        }}
+                        onMouseEnter={() => {
+                            document.getElementById('input').placeholder = ""
+                        }}
+                        onBlur={() => {
+                            document.getElementById('input').placeholder = "Search People...."
+                        }} type="text" placeholder='Search People....' />
+                </div>
+                {arr.length > 0 &&
+                    <div id='searchResults'>
+                        {arr.map((elem) => {
+                            return (<div>
+                                <div id='allFriendsElem' ><div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                        {elem.username}
+                                        <div>{
+                                            elem.email
+                                        }</div>
+                                    </div>
+                                </div>
+                                    <div >
+                                        <div onClick={(e) => {handleSendRequest(elem._id);
+                                        e.target.innerText='Sent'
+                                        }} className='send'>Send
+                                        </div>
+                                    </div></div>
+                            </div>)
+                        })}
+                    </div>
+                }
+            </div>
+            <div id="btns">
+                <li id='one' style={{ borderRight: 'solid 1px wheat',fontSize:'0.75rem', fontFamily:'Montserrat', fontWeight:'bolder' }} onClick={() => {
+                    changeColor('one');
+                    document.getElementById('first').style.display = 'block';
+                    document.getElementById('second').style.display = 'none';
+                    document.getElementById('third').style.display = 'none';
+                    getfriends()
+                }}>ALL FRIENDS</li>
+                <li id='two' style={{ borderRight: 'solid 1px wheat', fontFamily:'Montserrat', fontWeight:'bolder',fontSize:'0.75rem', }} onClick={() => {
+                    changeColor('two')
+                    document.getElementById('second').style.display = 'block';
+                    document.getElementById('first').style.display = 'none';
+                    document.getElementById('third').style.display = 'none';
+                    getrequest()
+                }}>REQUESTS</li>
+                <li id='three'
+                style={{borderRight: 'solid 1px wheat', fontFamily:'Montserrat', fontWeight:'bolder',fontSize:'0.75rem',}}
+                 onClick={() => {
+                    changeColor('three')
+                    document.getElementById('second').style.display = 'none';
+                    document.getElementById('first').style.display = 'none';
+                    document.getElementById('third').style.display = 'block';
+                    sentrequest();
+                }}>SENT REQUESTS</li>
+            </div>
+            <div style={{ display: 'none' }} id='first' className='newFriendsTable'>
+                {allfriends===false ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'
+             }}>
+        <div className="loader"></div>
+      </div> : <>
+      { allfriends.length>0 ? allfriends.map((elem) => {
+                    return (<div id='listitem' style={{ display: 'flex', alignItems: 'center' }}>
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80" alt="" />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '75%', alignItems:'center'}}>
+                            <div>{elem.username}</div>
+                            <div className='send' onClick={() => {
+                                handleRejectFriend(elem._id)
+                            }}> remove </div>
+                        </div>
+                    </div>)
+                }): 'No Friends'}
+      </>}   
+            </div>
+            <div id='second' className='newRequestTable' style={{ display: 'none' }} >
+            {friendRequestsData===false ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'
+             }}>
+        <div className="loader"></div>
+      </div> : <>
+      {friendRequestsData.length > 0 ? friendRequestsData.map((elem) => {
+                    return (<div id='listitem' style={{ display: 'flex', alignItems: 'center' }}>
+                        <div>
+                            <img src="https://www.imagediamond.com/blog/wp-content/uploads/2020/06/cartoon-boy-images-4.jpg" alt="" />
+                        </div>
+                        <div style={{display:'flex', justifyContent:'space-between', width:'75%', alignItems:'center'}}>
+                        <div>{elem.username}</div>
+                        <div style={{display:'flex', gap:'1rem'}}>
+                        <div className='send' onClick={() => {
+                            handleAccept(elem._id)
+                        }}> Accept </div>
+                        <div className='send' onClick={() => {
+                            handleReject(elem._id)
+                        }}> Reject </div>
+                        </div>
+                        </div>
+                    </div>)
+                }) : 'No Requests'}</>}
+            </div>
+            <div id='third' style={{ display: 'none' }} className='newSentTable'>
+            {friendSentData===false ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'
+             }}>
+        <div className="loader"></div>
+      </div> : <>
+      {friendSentData.length > 0 ? friendSentData.map((elem) => {
+                    return (<div id='listitem' style={{ display: 'flex', alignItems: 'center' }}>
+                        <div>
+                            <img src="https://www.imagediamond.com/blog/wp-content/uploads/2020/06/cartoon-boy-images-4.jpg" alt="" />
+                        </div>
+                        <div style={{display:'flex', justifyContent:'space-between', width:'75%', alignItems:'center'}}>
+                        <div>{elem.username}</div>
+                        <div className='send' onClick={() => {
+                            handleRejectSent(elem._id)
+                        }}> remove </div>
+                        </div>
+                    </div>)
+                }) : 'No Requests'}
+      </>}
+            </div>
+        </div>
+    )
+}
+---------------------------

@@ -1,0 +1,184 @@
+#container_newFriends input {
+    padding: 0;
+    margin: 0;
+    background-color: rgb(121, 140, 184);
+    border: none;
+    font-size: 0.85rem;
+    margin-left: 0.70rem;
+    width: 100%;
+    color: white;
+
+}
+
+input:focus {
+    outline: none;
+    /* Remove the default focus outline */
+    border: none;
+    /* Remove the border on focus */
+}
+
+::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: white;
+    opacity: 80%;
+    /* Firefox */
+}
+
+
+#btns {
+    display: flex;
+
+
+
+    border-radius: 0.5rem;
+
+
+}
+
+#container_newFriends {
+
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-top: 7rem;
+    align-items: center;
+
+}
+
+#btns li {
+
+    list-style: none;
+    padding: 10px 20px;
+    background-color: #001f3f;
+    /* Dark blue or navy blue for contrast */
+    border: none;
+    color: #fff;
+    /* White for button text */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+
+}
+
+#btns li:hover {
+    background-color: #1c5d9d;
+}
+
+#one {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+
+#three {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+li:hover {
+    cursor: pointer;
+
+}
+
+
+
+#search-container {
+    display: flex;
+    padding: 0.85rem 1.25rem;
+    border-radius: 2rem;
+    border: none;
+    background-color: rgb(121, 140, 184);
+    font-size: 0.75rem;
+    opacity: 70%;
+    position: relative;
+
+}
+
+.newFriendsTable,
+.newSentTable,
+.newRequestTable {
+
+
+
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+
+    height: 50vh;
+    overflow: scroll;
+    border-radius: 1rem;
+
+    align-items: center;
+
+    
+
+
+
+}
+
+.newFriendsTable img,
+.newSentTable img,
+.newRequestTable img {
+
+    width: 50px;
+    height: 50px;
+    border-radius: 30%;
+    margin-right: 10px;
+}
+
+.newFriendsTable #listitem,
+.newSentTable #listitem,
+.newRequestTable #listitem {
+    background-color: white;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+
+
+    font-size: small;
+    gap: 0.55rem;
+    font-size: 0.85rem;
+    width: 100%;
+    padding: 1rem 2rem;
+
+}
+
+#searchResults {
+
+
+    background-color: rgb(247, 246, 246);
+
+    border-radius: 1rem;
+    width: 100%;
+    padding: 1rem 0;
+    position: absolute;
+
+    max-height: 60vh;
+    overflow: scroll;
+
+}
+
+#allFriendsElem {
+    font-size: 0.75rem;
+    padding: 1rem 2rem;
+    margin: 0.5rem 1rem;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0.5rem;
+
+}
+
+.send {
+
+    padding: 0.5rem 1rem;
+    background-color: rgb(109, 58, 237);
+    height: fit-content;
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 0.7rem;
+    text-transform: capitalize;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+
+    cursor: pointer;
+}
